@@ -15,7 +15,7 @@ Thanks to SMOKE for taking the risk of modding some files in vs0 (That doesn't s
 0x400= vd0
 0x500= tm0
 0x700= ud0
-0x800= ux0??
+0x800= sa0
 0x900= gro0
 0xC00= pd0
 
