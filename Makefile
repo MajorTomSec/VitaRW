@@ -1,8 +1,8 @@
-TITLE_ID = VPRW00001
-TARGET   = VitaRW
+TITLE_ID = VPRO00001
+TARGET   = VitaRO
 OBJS     = main.o graphics.o font.o
 
-LIBS = -lSceKernel_stub -lSceVshBridge_stub -lSceDisplay_stub
+LIBS = -lSceKernelThreadMgr_stub -lSceVshBridge_stub -lSceDisplay_stub
 
 PREFIX  = arm-vita-eabi
 CC      = $(PREFIX)-gcc

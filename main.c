@@ -32,8 +32,8 @@ int main(int argc, char *argv[]) {
 		printf("Unmounting partition with id 0x%X\n", (i * 0x100));
 		vshIoUmount(i * 0x100, 0, 0, 0); // id, unk1, unk2, unk3 (flags ?)
 
-		printf("Mounting partition 0x%X with RW permissions...\n", (i * 0x100));
-		_vshIoMount(i * 0x100, 0, 2, buf); // id, unk, permission, work_buffer
+		printf("Mounting partition 0x%X with RO permissions...\n", (i * 0x100));
+		_vshIoMount(i * 0x100, 0, 1, buf); // id, unk, permission, work_buffer
 	}
 
 	printf("\n\nAuto-exiting in 5 seconds...");
