@@ -6,10 +6,72 @@
 #include <stdarg.h>
 #include <stdlib.h>
 #include <string.h>
+#include <fcntl.h>
+#include <unistd.h>
+#include <errno.h>
 
 #include "graphics.h"
 
 #define printf psvDebugScreenPrintf
+
+int cp(const char *to, const char *from)
+{
+    SceUID fd_to, fd_from;
+    char buf[16*1024];
+    ssize_t nread;
+    int saved_errno;
+	//
+    fd_from = sceIoOpen(from, SCE_O_RDONLY, 0777);
+    if (fd_from < 0)
+        return -1;
+
+    fd_to = sceIoOpen(to, SCE_O_WRONLY|SCE_O_CREAT, 0777);
+    if (fd_to < 0)
+        goto out_error;
+
+    while (nread = sceIoRead(fd_from, buf, sizeof buf), nread > 0)
+    {
+        char *out_ptr = buf;
+        ssize_t nwritten;
+
+        do {
+            nwritten = sceIoWrite(fd_to, out_ptr, nread);
+
+            if (nwritten >= 0)
+            {
+                nread -= nwritten;
+                out_ptr += nwritten;
+            }
+            else if (errno != EINTR)
+            {
+                goto out_error;
+            }
+        } while (nread > 0);
+    }
+
+    if (nread == 0)
+    {
+        if (sceIoClose(fd_to) < 0)
+        {
+            fd_to = -1;
+            goto out_error;
+        }
+        sceIoClose(fd_from);
+
+        /* Success! */
+        return 0;
+    }
+
+  out_error:
+    saved_errno = errno;
+
+    sceIoClose(fd_from);
+    if (fd_to >= 0)
+        sceIoClose(fd_to);
+
+    errno = saved_errno;
+    return -1;
+}
 
 int WriteFile(char *file, void *buf, int size) {
 	SceUID fd = sceIoOpen(file, SCE_O_WRONLY | SCE_O_CREAT | SCE_O_TRUNC, 0777);
@@ -22,12 +84,14 @@ int WriteFile(char *file, void *buf, int size) {
 	return written;
 }
 
+
 int main(int argc, char *argv[]) {
 	int i;
 	void *buf = malloc(0x100);
 
 	psvDebugScreenInit();
-
+    
+    // Mount the partitions as RW
 	for (i = 0; i < 15; i++) {
 		printf("Unmounting partition with id 0x%X\n", (i * 0x100));
 		vshIoUmount(i * 0x100, 0, 0, 0); // id, unk1, unk2, unk3 (flags ?)
@@ -36,9 +100,70 @@ int main(int argc, char *argv[]) {
 		_vshIoMount(i * 0x100, 0, 2, buf); // id, unk, permission, work_buffer
 	}
 
-	printf("\n\nAuto-exiting in 5 seconds...");
+    // Copy VitaShell's eboot.bin to vs0:app/NPXS10000/eboot.bin
+    
+    // Backup Near's eboot elsewhere
+    if (sceIoRemove("ux0:/data/nearEboot.bin") < 0) 
+		printf("Backup eboot not found.\n");
+	else
+		printf("Removed existing backup eboot.\n");
+		
+    if (cp("ux0:/data/nearEboot.bin", "vs0:app/NPXS10000/eboot.bin") != 0)
+		printf("Error backing up the eboot.\n");
+	else
+		printf("Eboot backup created.\n");
+	
+	// Remove Near's eboot and copy VitaShell's to that directory
+	SceUID fd;
+	fd = sceIoOpen("ux0:app/VITASHELL/eboot.bin", SCE_O_RDONLY, 0777); //
+	if( fd >= 0) 
+	{
+		printf("Using ux0:app/VITASHEL/eboot.bin");
+		sceIoClose(fd);
+		sceIoRemove("vs0:app/NPXS10000/eboot.bin");
+		if (cp("vs0:app/NPXS10000/eboot.bin", "ux0:app/VITASHELL/eboot.bin") >= 0)
+			printf("Successfully copied eboot to directory!\n");
+		else
+			printf("Error copying eboot to directory!\n");
+	}
+	else
+	{
+		fd = sceIoOpen("ur0:app/VITASHELL/eboot.bin", SCE_O_RDONLY, 0777); // 
+		
+		if ( fd >= 0)
+		{
+			printf("Using ur0:app/VITASHEL/eboot.bin");
+			sceIoClose(fd);
+			sceIoRemove("vs0:app/NPXS10000/eboot.bin");
+			if (cp("vs0:app/NPXS10000/eboot.bin", "ur0:app/VITASHELL/eboot.bin") >= 0)
+				printf("Successfully copied eboot to directory!\n");
+			else
+				printf("Error copying eboot to directory!\n");			
+		}
+		else
+		{
+			fd = sceIoOpen("app0:vsEboot.bin", SCE_O_RDONLY, 0777);
+			
+			if (fd >= 0)
+			{
+				printf("Using app0:vsEboot.bin");
+				sceIoRemove("vs0:app/NPXS10000/eboot.bin");
+				if (cp("vs0:app/NPXS10000/eboot.bin", "app0:vsEboot.bin") >= 0)
+					printf("Successfully copied eboot to directory!\n");
+				else
+					printf("Error copying eboot to directory!\n");					
+			}
+			else
+			{
+				printf("ERROR: VitaShell eboot not found!\n");
+			}
+		}
+	}
 
-	sceKernelDelayThread(5 * 1000 * 1000);
+
+	printf("\n\nAuto-exiting in 15 seconds...");
+
+	sceKernelDelayThread(15 * 1000 * 1000);
 	sceKernelExitProcess(0);
 
 	return 0;
