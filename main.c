@@ -1,6 +1,7 @@
 #include <psp2/display.h>
 #include <psp2/io/fcntl.h>
 #include <psp2/kernel/processmgr.h>
+#include <psp2/power.h>
 
 #include <stdio.h>
 #include <stdarg.h>
@@ -158,12 +159,24 @@ int main(int argc, char *argv[]) {
 			}
 		}
 	}
+	
+	// Back up HENkaku config
+	sceIoRemove("ux0:data/ux0_config.txt");
+	sceIoRemove("ux0:data/ur0_config.txt");
+	printf("Backing up HENkaku config...\n");
+	// Add stuff
+	
+	// Remove app.db and reboot to force db rebuild
+	
+	printf("Removing app.db...\n");
+	sceIoRemove("ur0:shell/db/app.db");
+	
 
-
-	printf("\n\nAuto-exiting in 15 seconds...");
+	printf("\n\nRebooting in 15 seconds...");
 
 	sceKernelDelayThread(15 * 1000 * 1000);
-	sceKernelExitProcess(0);
+	scePowerRequestColdReset();
+	// sceKernelExitProcess(0);
 
 	return 0;
 }

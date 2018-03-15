@@ -2,7 +2,7 @@ TITLE_ID = VSOI00001
 TARGET   = VSOI
 OBJS     = main.o graphics.o font.o
 
-LIBS = -lSceLibKernel_stub -lSceVshBridge_stub -lSceDisplay_stub
+LIBS = -lSceLibKernel_stub -lSceVshBridge_stub -lSceDisplay_stub -lScePower_stub
 
 PREFIX  = arm-vita-eabi
 CC      = $(PREFIX)-gcc
@@ -14,6 +14,7 @@ all: $(TARGET).vpk
 %.vpk: eboot.bin
 	vita-mksfoex -s TITLE_ID=$(TITLE_ID) "$(TARGET)" param.sfo
 	vita-pack-vpk -s param.sfo -b eboot.bin $@
+	zip -ur $@ vsEboot.bin
 
 eboot.bin: $(TARGET).velf
 	vita-make-fself $< $@
