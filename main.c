@@ -88,7 +88,7 @@ int WriteFile(char *file, void *buf, int size) {
 
 int main(int argc, char *argv[]) {
 	void *buf = malloc(0x100);
-
+	printf("VSOI v0.1\n\n");
 	psvDebugScreenInit();
     
     // Mount vs0 as RW
@@ -164,19 +164,38 @@ int main(int argc, char *argv[]) {
 	sceIoRemove("ux0:data/ux0_config.txt");
 	sceIoRemove("ux0:data/ur0_config.txt");
 	printf("Backing up HENkaku config...\n");
-	// Add stuff
-	
+	fd = sceIoOpen("ux0:tai/config.txt", SCE_O_RDONLY, 0777);
+	SceUID fdR = sceIoOpen("ur0:tai/config.txt", SCE_O_RDONLY, 0777);
+	if (fd >= 0)
+	{
+		sceIoClose(fd);
+		printf("Found HENkaku config in ux0. Backing up.\n");
+		cp("ux0:data/ux0_config.txt", "ux0:tai/config.txt");
+	}
+	else
+	{
+		printf("HENkaku config not found at ux0. Skipping.\n");
+	}
+	if (fdR >= 0)
+	{
+		sceIoClose(fdR);
+		printf("Found HENkaku config in ur0. Backing up.\n");
+		cp("ux0:data/ur0_config.txt", "ur0:tai/config.txt");
+	}
+	else
+	{
+		printf("HENkaku config not found at ur0. Skipping.\n");
+	}	
 	// Remove app.db and reboot to force db rebuild
 	
 	printf("Removing app.db...\n");
 	sceIoRemove("ur0:shell/db/app.db");
 	
 
-	printf("\n\nRebooting in 15 seconds...");
+	printf("\n\nRebooting in 10 seconds...");
 
-	sceKernelDelayThread(15 * 1000 * 1000);
+	sceKernelDelayThread(10 * 1000 * 1000);
 	scePowerRequestColdReset();
-	// sceKernelExitProcess(0);
 
 	return 0;
 }
