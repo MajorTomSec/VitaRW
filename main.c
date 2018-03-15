@@ -115,49 +115,19 @@ int main(int argc, char *argv[]) {
 	
 	// Remove Near's eboot and copy VitaShell's to that directory
 	SceUID fd;
-	fd = sceIoOpen("ux0:app/VITASHELL/eboot.bin", SCE_O_RDONLY, 0777); //
-	if( fd >= 0) 
+	fd = sceIoOpen("app0:vsEboot.bin", SCE_O_RDONLY, 0777);		
+	if (fd >= 0)
 	{
-		printf("Using ux0:app/VITASHELL/eboot.bin");
-		sceIoClose(fd);
+		printf("Using app0:vsEboot.bin\n");
 		sceIoRemove("vs0:app/NPXS10000/eboot.bin");
-		if (cp("vs0:app/NPXS10000/eboot.bin", "ux0:app/VITASHELL/eboot.bin") >= 0)
+		if (cp("vs0:app/NPXS10000/eboot.bin", "app0:vsEboot.bin") >= 0)
 			printf("Successfully copied eboot to directory!\n");
 		else
-			printf("Error copying eboot to directory!\n");
+			printf("Error copying eboot to directory!\n");					
 	}
 	else
 	{
-		fd = sceIoOpen("ur0:app/VITASHELL/eboot.bin", SCE_O_RDONLY, 0777); // 
-		
-		if ( fd >= 0)
-		{
-			printf("Using ur0:app/VITASHELL/eboot.bin");
-			sceIoClose(fd);
-			sceIoRemove("vs0:app/NPXS10000/eboot.bin");
-			if (cp("vs0:app/NPXS10000/eboot.bin", "ur0:app/VITASHELL/eboot.bin") >= 0)
-				printf("Successfully copied eboot to directory!\n");
-			else
-				printf("Error copying eboot to directory!\n");			
-		}
-		else
-		{
-			fd = sceIoOpen("app0:vsEboot.bin", SCE_O_RDONLY, 0777);
-			
-			if (fd >= 0)
-			{
-				printf("Using app0:vsEboot.bin");
-				sceIoRemove("vs0:app/NPXS10000/eboot.bin");
-				if (cp("vs0:app/NPXS10000/eboot.bin", "app0:vsEboot.bin") >= 0)
-					printf("Successfully copied eboot to directory!\n");
-				else
-					printf("Error copying eboot to directory!\n");					
-			}
-			else
-			{
-				printf("ERROR: VitaShell eboot not found!\n");
-			}
-		}
+		printf("ERROR: VitaShell eboot not found!\n");
 	}
 	
 	// Back up HENkaku config
