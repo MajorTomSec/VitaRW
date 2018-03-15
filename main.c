@@ -88,9 +88,9 @@ int WriteFile(char *file, void *buf, int size) {
 
 int main(int argc, char *argv[]) {
 	void *buf = malloc(0x100);
-	printf("VSOI v0.1\n\n");
+	
 	psvDebugScreenInit();
-    
+    printf("VSOI v0.1\n\n");
     // Mount vs0 as RW
 	
 	printf("Unmounting partition with id 0x%X\n", 0x300); // 0x300 is vs0
@@ -189,6 +189,10 @@ int main(int argc, char *argv[]) {
 	// Remove app.db and reboot to force db rebuild
 	
 	printf("Removing app.db...\n");
+	
+	// Back up app.db before removing
+	sceIoRemove("ux0:data/app_db_bak.db");
+	cp("ux0:data/app_db_bak.db", "ur0:shell/db/app.db");
 	sceIoRemove("ur0:shell/db/app.db");
 	
 
