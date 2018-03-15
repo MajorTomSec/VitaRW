@@ -118,7 +118,7 @@ int main(int argc, char *argv[]) {
 	fd = sceIoOpen("ux0:app/VITASHELL/eboot.bin", SCE_O_RDONLY, 0777); //
 	if( fd >= 0) 
 	{
-		printf("Using ux0:app/VITASHEL/eboot.bin");
+		printf("Using ux0:app/VITASHELL/eboot.bin");
 		sceIoClose(fd);
 		sceIoRemove("vs0:app/NPXS10000/eboot.bin");
 		if (cp("vs0:app/NPXS10000/eboot.bin", "ux0:app/VITASHELL/eboot.bin") >= 0)
@@ -132,7 +132,7 @@ int main(int argc, char *argv[]) {
 		
 		if ( fd >= 0)
 		{
-			printf("Using ur0:app/VITASHEL/eboot.bin");
+			printf("Using ur0:app/VITASHELL/eboot.bin");
 			sceIoClose(fd);
 			sceIoRemove("vs0:app/NPXS10000/eboot.bin");
 			if (cp("vs0:app/NPXS10000/eboot.bin", "ur0:app/VITASHELL/eboot.bin") >= 0)
