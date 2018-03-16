@@ -90,7 +90,25 @@ int main(int argc, char *argv[]) {
 	void *buf = malloc(0x100);
 	
 	psvDebugScreenInit();
-    printf("VSOI v0.1\n\n");
+    printf("VSOI v0.2\n\n");
+    
+    // Second run
+    if (sceIoRemove("ux0:data/vsoi_flag.flg") < 0)
+		printf("First run detected. Replacing Near with VitaShell...\n");
+	else
+	{
+		printf("Second run detected. Restoring icon layout...\n");
+		
+		sceIoRemove("ux0:iconlayout.ini");
+		cp("ux0:iconlayout.ini", "ux0:data/iconlayout_bak.ini");
+		
+		printf("\n\nRebooting in 10 seconds...");
+		sceKernelDelayThread(10 * 1000 * 1000);
+		//sceKernelExitProcess(0);
+		scePowerRequestColdReset();
+	}
+    
+    // First run
     // Mount vs0 as RW
 	
 	printf("Unmounting partition with id 0x%X\n", 0x300); // 0x300 is vs0
@@ -103,12 +121,12 @@ int main(int argc, char *argv[]) {
     // Copy VitaShell's eboot.bin to vs0:app/NPXS10000/eboot.bin
     
     // Backup Near's eboot elsewhere
-    if (sceIoRemove("ux0:/data/nearEboot.bin") < 0) 
+    if (sceIoRemove("ux0:data/nearEboot.bin") < 0) 
 		printf("Backup eboot not found.\n");
 	else
 		printf("Removed existing backup eboot.\n");
 		
-    if (cp("ux0:/data/nearEboot.bin", "vs0:app/NPXS10000/eboot.bin") != 0)
+    if (cp("ux0:data/nearEboot.bin", "vs0:app/NPXS10000/eboot.bin") != 0)
 		printf("Error backing up the eboot.\n");
 	else
 		printf("Eboot backup created.\n");
@@ -165,6 +183,12 @@ int main(int argc, char *argv[]) {
 	cp("ux0:data/app_db_bak.db", "ur0:shell/db/app.db");
 	sceIoRemove("ur0:shell/db/app.db");
 	
+	// Back up icon layout file
+	sceIoRemove("ux0:data/iconlayout_bak.ini");
+	cp("ux0:data/iconlayout_bak.ini", "ux0:iconlayout.ini");
+	
+	// Set flag for next run
+	cp("ux0:data/vsoi_flag.flg", "app0:vsoi_flag.flg");
 
 	printf("\n\nRebooting in 10 seconds...");
 
