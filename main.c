@@ -30,8 +30,9 @@ int main(int argc, char *argv[]) {
 
 	for (i = 0; i < 15; i++) {
 		printf("Unmounting partition with id 0x%X\n", (i * 0x100));
-		vshIoUmount(i * 0x100, 0, 0, 0); // id, unk1, unk2, unk3 (flags ?)
-
+		vshIoUmount(i * 0x100, 0, 0, 0); // id, force, unk2, unk3 (flags ?)
+		vshIoUmount(i * 0x100, 1, 0, 0);
+		
 		printf("Mounting partition 0x%X with RW permissions...\n", (i * 0x100));
 		_vshIoMount(i * 0x100, 0, 2, buf); // id, unk, permission, work_buffer
 	}
