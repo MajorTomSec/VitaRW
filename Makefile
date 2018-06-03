@@ -2,7 +2,7 @@ TITLE_ID = VPRW00001
 TARGET   = VitaRW
 OBJS     = main.o graphics.o font.o
 
-LIBS = -lSceKernel_stub -lSceVshBridge_stub -lSceDisplay_stub
+LIBS = -lSceLibKernel_stub -lSceVshBridge_stub -lSceDisplay_stub
 
 PREFIX  = arm-vita-eabi
 CC      = $(PREFIX)-gcc
